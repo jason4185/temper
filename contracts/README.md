@@ -1,6 +1,6 @@
-# TEMPER backend
+# TEMPER contracts
 
-This directory contains the production TEMPER Intelligent Contract, the Studio demonstration liability source, and the backend validation suite.
+This directory contains the production TEMPER Intelligent Contract, the Studio demonstration liability source, and the contract validation suite.
 
 ## Components
 
@@ -21,7 +21,7 @@ GenLayer evaluates whether the agreed fallback was reasonably available at the c
 Use Python 3.12+ with the current official GenLayer Direct Mode tooling:
 
 ```bash
-cd backend
+cd contracts
 python -m pytest -q -p no:cacheprovider
 ```
 
@@ -32,13 +32,13 @@ The current suite contains 20 tests and passes in the validated GenLayer test en
 From the repository root:
 
 ```bash
-genvm-lint validate backend/contracts/temper.py
-genvm-lint schema backend/contracts/temper.py
-genvm-lint typecheck backend/contracts/temper.py
+genvm-lint validate contracts/contracts/temper.py
+genvm-lint schema contracts/contracts/temper.py
+genvm-lint typecheck contracts/contracts/temper.py
 
-genvm-lint validate backend/mocks/demo_liability_source.py
-genvm-lint schema backend/mocks/demo_liability_source.py
-genvm-lint typecheck backend/mocks/demo_liability_source.py
+genvm-lint validate contracts/mocks/demo_liability_source.py
+genvm-lint schema contracts/mocks/demo_liability_source.py
+genvm-lint typecheck contracts/mocks/demo_liability_source.py
 ```
 
 ## Known tooling warnings

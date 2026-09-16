@@ -115,22 +115,22 @@ bun scripts/test-evidence-preparation.ts
 bun scripts/test-payout-fees.ts
 ```
 
-The backend tests require the current GenLayer Direct Mode tooling and Python 3.12+ environment:
+The contract tests require the current GenLayer Direct Mode tooling and Python 3.12+ environment:
 
 ```bash
-cd backend
+cd contracts
 python -m pytest -q -p no:cacheprovider
 ```
 
 Contract validation commands:
 
 ```bash
-genvm-lint validate backend/contracts/temper.py
-genvm-lint schema backend/contracts/temper.py
-genvm-lint typecheck backend/contracts/temper.py
-genvm-lint validate backend/mocks/demo_liability_source.py
-genvm-lint schema backend/mocks/demo_liability_source.py
-genvm-lint typecheck backend/mocks/demo_liability_source.py
+genvm-lint validate contracts/contracts/temper.py
+genvm-lint schema contracts/contracts/temper.py
+genvm-lint typecheck contracts/contracts/temper.py
+genvm-lint validate contracts/mocks/demo_liability_source.py
+genvm-lint schema contracts/mocks/demo_liability_source.py
+genvm-lint typecheck contracts/mocks/demo_liability_source.py
 ```
 
 These commands assume the official GenLayer tooling is installed separately; this repository does not replace that toolchain's environment management.
@@ -150,9 +150,9 @@ The complete evidence body is not stored onchain. The source reference and hash 
 
 ```text
 frontend/                 TanStack/Vite application and read/write adapter
-backend/contracts/        TEMPER Intelligent Contract
-backend/mocks/             Studio demonstration liability source
-backend/tests/             Direct Mode and simulator tests
+contracts/contracts/      TEMPER Intelligent Contract
+contracts/mocks/          Studio demonstration liability source
+contracts/tests/          Direct Mode and simulator tests
 ```
 
 ## Known tooling notes

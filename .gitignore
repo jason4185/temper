@@ -55,7 +55,7 @@ coverage.xml
 frontend/README.md
 frontend/roadmap.md
 frontend/src/routes/README.md
-backend/requirements.txt
-backend/.env.example
-backend/fixtures/
-backend/scripts/
+contracts/requirements.txt
+contracts/.env.example
+contracts/fixtures/
+contracts/scripts/
