@@ -15,7 +15,7 @@ except Exception:
 
 ROOT = Path(__file__).parents[1]
 TEMPER = ROOT / "contracts" / "temper.py"
-DEMO_SOURCE = ROOT / "contracts" / "demo_liability_source.py"
+DEMO_SOURCE = ROOT / "contracts" / "temper_demo_liability_source.py"
 WEI = 10**18
 
 

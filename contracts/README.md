@@ -5,7 +5,7 @@ This directory contains the production TEMPER Intelligent Contract, the Studio d
 ## Components
 
 - `temper.py` — the production protocol: bonded service agreements, upstream liability receipt verification, mitigation evidence, GenLayer judgment, remedy accounting, settlement, provider withdrawal, and case closure.
-- `demo_liability_source.py` — a demo-only upstream liability source used to create deterministic Studio demonstration receipts. It is not production liability infrastructure.
+- `temper_demo_liability_source.py` — a demo-only upstream liability source used to create deterministic Studio demonstration receipts. It is not production liability infrastructure.
 - `../tests/` — Direct Mode and simulator coverage for receipt binding, agreement isolation, roles, evidence, judgment branches, remedy economics, settlement, withdrawals, and timeouts.
 
 ## Lifecycle
@@ -35,9 +35,9 @@ genvm-lint validate contracts/temper.py
 genvm-lint schema contracts/temper.py
 genvm-lint typecheck contracts/temper.py
 
-genvm-lint validate contracts/demo_liability_source.py
-genvm-lint schema contracts/demo_liability_source.py
-genvm-lint typecheck contracts/demo_liability_source.py
+genvm-lint validate contracts/temper_demo_liability_source.py
+genvm-lint schema contracts/temper_demo_liability_source.py
+genvm-lint typecheck contracts/temper_demo_liability_source.py
 ```
 
 ## Known tooling warnings
