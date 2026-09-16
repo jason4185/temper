@@ -360,15 +360,15 @@ export function TransactionSequence({
   const stepForWrite = (currentWrite: ContractWrite) => {
     if (currentWrite.method === "create_demo_liability") {
       return {
-        label: "Create confirmed-loss record",
-        description: "Stores the simulated upstream liability record used by TEMPER.",
+        label: "Create demo liability record",
+        description: "Stores the controlled demo upstream liability record used by TEMPER.",
       };
     }
     if (currentWrite.method === "open_claim") {
       return {
         label: "Open TEMPER case",
         description:
-          "Links that confirmed-loss record to this agreement and opens the remedy dispute.",
+          "Links that demo liability record to this agreement and opens the remedy dispute.",
       };
     }
     return {
@@ -490,8 +490,8 @@ export function TransactionSequence({
                 : `Approve ${pendingApprovalCount} wallet action${pendingApprovalCount === 1 ? "" : "s"} for this step.`}
             </h2>
             <p className="mt-3 text-sm leading-6 text-paper/60">
-              Approve each wallet write separately. TEMPER first records the simulated upstream
-              liability, then opens the remedy case against the agreement.
+              Approve each wallet write separately. TEMPER first records the controlled demo
+              upstream liability record, then opens the remedy case against the agreement.
             </p>
           </div>
 

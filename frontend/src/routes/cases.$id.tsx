@@ -600,12 +600,12 @@ function CaseDetail() {
         {isDemoLiabilitySource && demoLossRecordedAtQuery.data !== undefined && (
           <section className="mt-5 rounded-lg border border-violet/20 bg-violet/5 p-4 sm:p-5">
             <p className="text-xs font-bold uppercase tracking-[0.12em] text-violet">
-              Simulated loss record
+              Demo Loss Record
             </p>
             <DemoLossTimeline item={item} recordedAt={demoLossRecordedAtQuery.data} />
             <p className="mt-3 text-xs leading-5 text-paper/50">
-              For this demo source, loss between breach and measurement time is interpolated
-              linearly.
+              For this controlled demo source, loss between breach and measurement time is
+              interpolated linearly.
             </p>
           </section>
         )}
@@ -1103,7 +1103,7 @@ function StudioDevTestingHelper() {
         Studio Dev testing
       </p>
       <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
-        <p className="text-xs text-paper/55">Need simulated evidence to test TEMPER?</p>
+        <p className="text-xs text-paper/55">Need demo evidence to test TEMPER?</p>
         <a
           href={DEMO_EVIDENCE_LIBRARY_URL}
           target="_blank"

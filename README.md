@@ -154,21 +154,29 @@ Provider Withdrawal
 CLOSED
 ```
 
-## What is real and what is simulated?
+## Demo setup vs production integration
 
-### Simulated for the Studio demonstration
+### For the demo
 
-`DemoLiabilitySource` simulates the upstream liability system. It supplies demonstration facts such as:
+`DemoLiabilitySource` is a real deployed onchain contract that supplies controlled demo upstream liability records.
 
-- provider responsibility
+It provides the upstream facts TEMPER needs to begin a case:
+
+- provider
+- claimant
+- finalized liability
 - confirmed loss
-- loss history
+- loss history and timing
 
-This is necessary because TEMPER starts **after** liability has already been established. `DemoLiabilitySource` is not production liability infrastructure and does not perform the GenLayer judgment.
+**Real contract + controlled demo input.** `DemoLiabilitySource` provides the controlled upstream liability record onchain for this demonstration. It does not perform the GenLayer judgment.
 
-### Real TEMPER protocol flow
+### In production
 
-The following are the actual TEMPER and GenLayer flow:
+An external liability system would provide the finalized upstream records that TEMPER verifies before opening the remedy case.
+
+### TEMPER itself
+
+TEMPER is the real protocol flow after that input arrives:
 
 - bonded agreement state
 - liability receipt verification
@@ -180,7 +188,7 @@ The following are the actual TEMPER and GenLayer flow:
 - provider remainder withdrawal
 - `CLOSED` terminal state
 
-TEMPER’s settlement is not mocked: the judgment changes the recoverable amount, the remainder, and the terminal settlement state.
+The GenLayer judgment changes the recoverable amount, the provider remainder, and the terminal settlement state.
 
 # How TEMPER is built
 
@@ -283,12 +291,12 @@ Deterministic Remedy + Settlement
 
 DemoLiabilitySource
    |
-   | simulated upstream liability input
+   | controlled demo upstream liability record
    v
 TEMPER liability receipt verification
 ```
 
-`DemoLiabilitySource` supplies the demonstration input before the TEMPER case. It is separate from the GenLayer judgment itself.
+`DemoLiabilitySource` provides the controlled demo upstream liability record before the TEMPER case. It is separate from the GenLayer judgment itself.
 
 ## Contracts and deployment
 
@@ -296,7 +304,7 @@ Current verified Studio values:
 
 | Item | Value |
 | --- | --- |
-| Network | GenLayer Studio preview / Studio Next environment |
+| Network | GenLayer Studio preview / Studio Dev |
 | Chain ID | `61997` |
 | Canonical RPC | `https://studio-dev.genlayer.com/api` |
 | Explorer | [explorer-studio-dev.genlayer.com](https://explorer-studio-dev.genlayer.com/) |
@@ -312,7 +320,7 @@ temper/
 │   ├── temper.py    Production TEMPER Intelligent Contract
 │   ├── temper_demo_liability_source.py  Studio demonstration liability source
 │   └── README.md    Contract-specific notes
-├── tests/           Direct Mode and simulator coverage
+├── tests/           Direct Mode and contract coverage
 ├── frontend/       TanStack/Vite application and transaction adapter
 └── README.md        Product and developer overview
 ```

@@ -574,11 +574,12 @@ function AgreementDetail() {
                   <>
                     <div className="mt-4 border-t border-violet/20 pt-4">
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-violet">
-                        Simulate a service failure
+                        Use a demo liability record
                       </p>
                       <p className="mt-1.5 text-sm leading-5 text-paper/65">
-                        Studio Dev uses an onchain demo liability record to simulate an upstream
-                        finding that the service failed and caused confirmed loss.
+                        Studio Dev uses the deployed DemoLiabilitySource contract to provide a
+                        controlled upstream liability record: the service failure and confirmed
+                        loss.
                       </p>
                     </div>
                     <Button
@@ -732,7 +733,7 @@ function AgreementDetail() {
                 {[
                   {
                     step: "1",
-                    label: "Simulate upstream liability",
+                    label: "Create demo liability record",
                     current: demoStep === "liability",
                   },
                   { step: "2", label: "Open TEMPER case", current: demoStep === "case" },
@@ -761,12 +762,12 @@ function AgreementDetail() {
               </div>
               <DialogTitle className="mt-5 text-2xl font-bold text-paper">
                 {demoStep === "liability"
-                  ? "Simulate the upstream loss record"
+                  ? "Create the Demo Loss Record"
                   : "Open the TEMPER remedy case"}
               </DialogTitle>
               <DialogDescription className="mt-1.5 max-w-2xl text-sm leading-5 text-paper/55">
                 {demoStep === "liability"
-                  ? "Create the simulated upstream liability result TEMPER will verify before opening the remedy case."
+                  ? "Create the controlled demo upstream liability record TEMPER will verify before opening the remedy case."
                   : "Use the verified onchain receipt to open the post-liability remedy case."}
               </DialogDescription>
             </DialogHeader>
@@ -820,16 +821,17 @@ function AgreementDetail() {
                       TEMPER does not decide the original breach.
                     </p>
                     <p className="mt-1.5 text-xs leading-5">
-                      In production, an external trusted liability source — for example an
-                      adjudication system such as Internet Court — could establish responsibility
-                      and confirmed loss. For this demo, DemoLiabilitySource simulates that upstream
-                      step onchain.
+                      In production, the upstream liability record could come from an external
+                      liability protocol, service agreement system, claims system, or another
+                      trusted source. That record would establish responsibility and confirmed
+                      loss. For this demo, DemoLiabilitySource is a real deployed onchain contract
+                      providing a controlled upstream liability record.
                     </p>
                   </div>
                   <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(240px,0.8fr)]">
                     <div className="rounded-md border border-paper/10 bg-paper/[0.03] p-4">
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-paper/45">
-                        Simulated loss inputs
+                        Demo loss inputs
                       </p>
                       <div className="mt-3 grid gap-4 sm:grid-cols-2">
                         <DateTimeInput
@@ -857,7 +859,7 @@ function AgreementDetail() {
                     <div className="space-y-4">
                       <div className="rounded-md border border-paper/10 bg-paper/[0.02] p-3">
                         <p className="text-xs font-bold uppercase tracking-[0.14em] text-violet">
-                          Example loss record
+                          Demo Loss Record
                         </p>
                         <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-1.5">
                           <DemoTimelineEvent time="2:00 PM" event="Failure begins" amount="0 GEN" />
@@ -877,7 +879,7 @@ function AgreementDetail() {
                       </div>
                       <div className="rounded-md border border-violet/25 bg-violet/[0.04] p-4">
                         <p className="text-xs font-bold uppercase tracking-[0.14em] text-violet/85">
-                          Simulated record preview
+                          Demo record preview
                         </p>
                         <div className="mt-3 grid grid-cols-3 gap-3">
                           <TimeMetric label="Service failure" value={casePreview.breach} />
@@ -898,7 +900,7 @@ function AgreementDetail() {
                     </p>
                   )}
                   <p className="mt-4 text-xs leading-5 text-paper/55">
-                    This approval writes the simulated upstream liability record to
+                    This approval writes the controlled demo upstream liability record to
                     DemoLiabilitySource.
                   </p>
                 </>
@@ -961,8 +963,8 @@ function AgreementDetail() {
                     </span>
                   </div>
                   <p className="mt-5 text-sm leading-6 text-paper/60">
-                    The simulated upstream liability record is now stored onchain and has been read
-                    back from DemoLiabilitySource. TEMPER can use its verified receipt to open the
+                    The demo upstream liability record is now stored onchain and has been read back
+                    from DemoLiabilitySource. TEMPER can use its verified receipt to open the
                     post-liability remedy case.
                   </p>
                 </>
@@ -1008,9 +1010,9 @@ function AgreementDetail() {
               ? {
                   initialCompletedSteps: [
                     {
-                      label: "Create confirmed-loss record",
+                      label: "Create demo liability record",
                       description:
-                        "The matching testnet liability record already exists and will be reused.",
+                        "The matching demo liability record already exists and will be reused.",
                       status: "Already confirmed",
                     },
                   ],
@@ -1054,7 +1056,7 @@ function StudioDevArchitectureModule() {
     <section className="rounded-lg border border-violet/30 bg-[#17151f]/90 p-4 sm:p-5">
       <p className="text-xs font-bold uppercase tracking-[0.16em] text-violet">Studio Dev demo</p>
       <h2 className="mt-1.5 text-xl font-bold">
-        How the demo substitutes the upstream liability source.
+        How the demo connects the upstream liability source.
       </h2>
       <div className="mt-4 space-y-3">
         <ArchitectureLane
@@ -1063,7 +1065,7 @@ function StudioDevArchitectureModule() {
             {
               label: "External liability source",
               detail: "responsibility + confirmed loss",
-              example: "e.g. an adjudication system such as Internet Court",
+              example: "e.g. an external liability protocol, service agreement system, claims system, or another trusted source",
             },
             { label: "Liability receipt" },
             { label: "TEMPER remedy case" },
@@ -1073,7 +1075,7 @@ function StudioDevArchitectureModule() {
           label="Studio Dev"
           accent
           nodes={[
-            { label: "DemoLiabilitySource", detail: "simulated upstream result" },
+            { label: "DemoLiabilitySource", detail: "controlled demo upstream record" },
             { label: "Onchain liability record" },
             { label: "Verified receipt" },
             { label: "TEMPER remedy case" },
@@ -1081,9 +1083,9 @@ function StudioDevArchitectureModule() {
         />
       </div>
       <p className="mt-4 text-sm leading-6 text-paper/60">
-        TEMPER does not decide the original breach. On Studio Dev, DemoLiabilitySource simulates the
-        upstream liability result, stores it onchain, and TEMPER verifies the receipt before opening
-        the remedy case.
+        TEMPER does not decide the original breach. On Studio Dev, DemoLiabilitySource provides a
+        controlled upstream liability record, stores it onchain, and TEMPER verifies the receipt
+        before opening the remedy case.
       </p>
     </section>
   );

@@ -170,8 +170,8 @@ export function AgreementCard({ agreement }: { agreement: Agreement }) {
             <>
               <span className="font-bold text-violet">Studio Dev demo</span>
               <br />
-              No remedy case exists. Simulate a service failure only after upstream responsibility
-              and confirmed loss are established.
+              No remedy case exists. Start a demo case after upstream responsibility and confirmed
+              loss are established.
             </>
           ) : activeAndIdle ? (
             <>
@@ -420,7 +420,7 @@ export function TechnicalDetails({ caseId }: { caseId?: string | undefined }) {
       <CollapsibleContent className="mt-2 space-y-3 rounded-md border border-paper/10 bg-paper/[0.03] p-4 text-xs text-paper/55">
         <p>TEMPER Intelligent Contract</p>
         <CopyAddress address={TEMPER_CONTRACT} inverse />
-        <p>DemoLiabilitySource · supplies the established responsibility and covered-loss record</p>
+        <p>DemoLiabilitySource · controlled demo upstream liability record</p>
         <CopyAddress address={LOSS_RECORD_SOURCE} inverse />
         {caseId && (
           <p>
