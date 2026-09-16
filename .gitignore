@@ -1,0 +1,61 @@
+# macOS
+.DS_Store
+
+# Editors and local project metadata
+.vscode/
+.idea/
+frontend/.lovable/
+frontend/AGENTS.md
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+
+# Node / frontend generated output
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+.next/
+.cache/
+frontend/.output/
+frontend/.wrangler/
+frontend/.tanstack/
+frontend/.vinxi/
+frontend/.nitro/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.pyright/
+.ruff_cache/
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Local GenLayer / simulator / test artifacts
+artifacts/
+**/artifacts/
+**/.genlayer/
+**/.glsim/
+coverage.xml
+.coverage
+
+# Superseded or empty local notes/placeholders
+frontend/README.md
+frontend/roadmap.md
+frontend/src/routes/README.md
+backend/requirements.txt
+backend/.env.example
+backend/fixtures/
+backend/scripts/
