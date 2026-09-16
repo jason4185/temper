@@ -4,9 +4,9 @@ This directory contains the production TEMPER Intelligent Contract, the Studio d
 
 ## Components
 
-- `contracts/temper.py` — the production protocol: bonded service agreements, upstream liability receipt verification, mitigation evidence, GenLayer judgment, remedy accounting, settlement, provider withdrawal, and case closure.
-- `mocks/demo_liability_source.py` — a demo-only upstream liability source used to create deterministic Studio demonstration receipts. It is not production liability infrastructure.
-- `tests/` — Direct Mode and simulator coverage for receipt binding, agreement isolation, roles, evidence, judgment branches, remedy economics, settlement, withdrawals, and timeouts.
+- `temper.py` — the production protocol: bonded service agreements, upstream liability receipt verification, mitigation evidence, GenLayer judgment, remedy accounting, settlement, provider withdrawal, and case closure.
+- `demo_liability_source.py` — a demo-only upstream liability source used to create deterministic Studio demonstration receipts. It is not production liability infrastructure.
+- `../tests/` — Direct Mode and simulator coverage for receipt binding, agreement isolation, roles, evidence, judgment branches, remedy economics, settlement, withdrawals, and timeouts.
 
 ## Lifecycle
 
@@ -18,11 +18,10 @@ GenLayer evaluates whether the agreed fallback was reasonably available at the c
 
 ## Tests
 
-Use Python 3.12+ with the current official GenLayer Direct Mode tooling:
+Use Python 3.12+ with the current official GenLayer Direct Mode tooling from the repository root:
 
 ```bash
-cd contracts
-python -m pytest -q -p no:cacheprovider
+python -m pytest -q tests -p no:cacheprovider
 ```
 
 The current suite contains 20 tests and passes in the validated GenLayer test environment.
@@ -32,13 +31,13 @@ The current suite contains 20 tests and passes in the validated GenLayer test en
 From the repository root:
 
 ```bash
-genvm-lint validate contracts/contracts/temper.py
-genvm-lint schema contracts/contracts/temper.py
-genvm-lint typecheck contracts/contracts/temper.py
+genvm-lint validate contracts/temper.py
+genvm-lint schema contracts/temper.py
+genvm-lint typecheck contracts/temper.py
 
-genvm-lint validate contracts/mocks/demo_liability_source.py
-genvm-lint schema contracts/mocks/demo_liability_source.py
-genvm-lint typecheck contracts/mocks/demo_liability_source.py
+genvm-lint validate contracts/demo_liability_source.py
+genvm-lint schema contracts/demo_liability_source.py
+genvm-lint typecheck contracts/demo_liability_source.py
 ```
 
 ## Known tooling warnings

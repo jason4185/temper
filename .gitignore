@@ -55,7 +55,3 @@ coverage.xml
 frontend/README.md
 frontend/roadmap.md
 frontend/src/routes/README.md
-contracts/requirements.txt
-contracts/.env.example
-contracts/fixtures/
-contracts/scripts/

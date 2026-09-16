@@ -11,7 +11,7 @@ except Exception:
     pytestmark = pytest.mark.skip(reason="GenLayer direct-test plugin is unavailable")
 
 
-SOURCE = Path(__file__).parents[1] / "mocks" / "demo_liability_source.py"
+SOURCE = Path(__file__).parents[1] / "contracts" / "demo_liability_source.py"
 MAX_U256 = 2**256 - 1
 
 
