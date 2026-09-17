@@ -117,7 +117,7 @@ function Dashboard() {
       <AppPage>
         <PageContainer>
           <section className="rounded-lg border border-coral/30 bg-coral/10 p-6">
-            <h1 className="text-xl font-bold">Could not load dashboard</h1>
+            <h1 className="text-xl font-bold">TEMPER could not load the dashboard.</h1>
             <p className="mt-2 text-paper/70">
               {query.error
                 ? rpcErrorMessage(query.error, false)

@@ -23,7 +23,7 @@ export async function prepareEvidence(url: string): Promise<PreparedEvidence> {
   try {
     payload = await response.json();
   } catch {
-    throw new Error("Evidence preparation returned an invalid response.");
+    throw new Error("The evidence service returned an invalid response. Try again.");
   }
 
   if (!response.ok) {
@@ -31,11 +31,13 @@ export async function prepareEvidence(url: string): Promise<PreparedEvidence> {
       typeof payload === "object" && payload !== null && "error" in payload
         ? payload.error
         : undefined;
-    throw new Error(typeof message === "string" ? message : "Evidence could not be prepared.");
+    throw new Error(
+      typeof message === "string" ? message : "TEMPER could not prepare the evidence. Try again.",
+    );
   }
 
   if (!isPreparedEvidence(payload)) {
-    throw new Error("Evidence preparation returned incomplete data.");
+    throw new Error("The evidence service returned incomplete data. Try again.");
   }
   return payload;
 }

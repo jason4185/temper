@@ -265,7 +265,7 @@ export function WalletControl({ dark = false }: { dark?: boolean }) {
             dark ? "text-coral" : "text-coral",
           )}
         >
-          Wrong network
+          Your wallet is connected to the wrong network.
         </span>
         <Button size="sm" variant="hero" onClick={() => void wallet.switchToStudioNext()}>
           Switch to Studio Dev

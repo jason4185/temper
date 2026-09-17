@@ -35,6 +35,65 @@ export async function verifySuccessfulTransaction(status: TrackedStatus, client:
   return status.genlayerTxId;
 }
 
+function presentTransactionError(reason: unknown) {
+  const detail = reason instanceof Error ? reason.message : String(reason);
+  const normalized = detail.toLowerCase();
+
+  if (/user rejected|user denied|user cancel|rejected by (?:the )?user|\b4001\b/.test(normalized)) {
+    return "The transaction was rejected in your wallet. No changes were made.";
+  }
+  if (
+    /wrong network|wrong chain|chain mismatch|unsupported chain|unsupported network|unknown chain|\b4902\b|chain id/.test(
+      normalized,
+    )
+  ) {
+    return "Your wallet is connected to the wrong network. Switch to Studio Dev and try again.";
+  }
+  if (
+    /insufficient funds|insufficient balance|not enough (?:gen|funds)|fee.*(?:balance|funds)/.test(
+      normalized,
+    )
+  ) {
+    return "Your wallet does not have enough GEN to cover this transaction. Add funds and try again.";
+  }
+  if (/deadline|response window|agreement expired|case expired/.test(normalized)) {
+    return "This action is no longer available because the deadline has passed.";
+  }
+  if (/still pending|not finalized|finality|pending finality/.test(normalized)) {
+    return "The transaction is still awaiting finality. Check its status before trying again.";
+  }
+  if (
+    /unauthorized|not authorized|permission denied|caller is not|role mismatch/.test(normalized)
+  ) {
+    return "You do not have permission to perform this action. Check that the connected wallet has the required TEMPER role.";
+  }
+  if (
+    /execution reverted|execution failed|failed to execute|contract.*(?:reject|fail)|revert|transaction decision was not successful/.test(
+      normalized,
+    )
+  ) {
+    return "The transaction was submitted, but the contract did not complete it. Review the current agreement or case state and try again.";
+  }
+  if (
+    /failed to fetch|fetch failed|network error|connection error|transport|rpc|unavailable/.test(
+      normalized,
+    )
+  ) {
+    return "The transaction could not reach Studio Dev. Check your connection and try again.";
+  }
+  if (/fee estimate|failed to estimate|gas estimate|estimate.*fee/.test(normalized)) {
+    return "TEMPER could not prepare the transaction fee estimate. Review the fee details and try again.";
+  }
+  if (
+    /already (?:completed|settled|resolved|finalized)|invalid state|state.*invalid|not active/.test(
+      normalized,
+    )
+  ) {
+    return "This action is no longer available because the agreement or case state has changed.";
+  }
+  return "The transaction could not be completed. Review the details and try again.";
+}
+
 function trackFinalizationInBackground(
   kit: TransactionKit,
   txId: string,
@@ -145,7 +204,7 @@ export function TransactionRunner({
     if (state.step === "error") {
       if (reportedError.current !== state.message) {
         reportedError.current = state.message;
-        onError(new Error(state.message));
+        onError(new Error(presentTransactionError(state.message)));
         onDismiss?.();
       }
       return;
@@ -165,9 +224,9 @@ export function TransactionRunner({
         await onSuccess(decidedTxId);
       })
       .catch((reason: unknown) => {
-        const error = reason instanceof Error ? reason : new Error(String(reason));
-        setVerificationError(error.message);
-        onError(error);
+        const message = presentTransactionError(reason);
+        setVerificationError(message);
+        onError(new Error(message));
       });
   }, [client, onDismiss, onError, onFinalized, onSuccess, state, transactionKit]);
 
@@ -178,7 +237,9 @@ export function TransactionRunner({
     flow.reset();
   };
   const showError = state.step === "error" || Boolean(verificationError);
-  const errorMessage = verificationError || (state.step === "error" ? state.message : undefined);
+  const errorMessage =
+    verificationError ||
+    (state.step === "error" ? presentTransactionError(state.message) : undefined);
 
   const content = (
     <div className="space-y-4">
@@ -216,8 +277,8 @@ export function TransactionRunner({
               )}
               {state.step === "blocked" && (
                 <div className="gltk-outcome" data-tone="error">
-                  <p className="gltk-outcome-title">Fee estimate needs review</p>
-                  <p className="gltk-outcome-detail">{state.message}</p>
+                  <p className="gltk-outcome-title">The fee estimate needs review.</p>
+                  <p className="gltk-outcome-detail">{presentTransactionError(state.message)}</p>
                 </div>
               )}
               <div className="gltk-actions">
@@ -278,7 +339,7 @@ export function TransactionRunner({
           {showError && errorMessage && (
             <>
               <div className="gltk-outcome" data-tone="error">
-                <p className="gltk-outcome-title">Transaction not completed</p>
+                <p className="gltk-outcome-title">The transaction was not completed.</p>
                 <p className="gltk-outcome-detail">{errorMessage}</p>
               </div>
               <div className="gltk-actions">
@@ -462,7 +523,7 @@ export function TransactionSequence({
             {failure && (
               <div className="mt-3 rounded-lg border border-coral/40 bg-coral/10 p-3" role="alert">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-bold text-coral">Open TEMPER case failed</p>
+                  <p className="text-sm font-bold text-coral">TEMPER could not open this case.</p>
                   {onDismiss && (
                     <button
                       type="button"
@@ -590,7 +651,9 @@ export function TransactionSequence({
 
           {failure && (
             <div className="mt-4 rounded-lg border border-coral/40 bg-coral/10 p-4" role="alert">
-              <p className="text-sm font-bold text-coral">Step {failure.step} failed</p>
+              <p className="text-sm font-bold text-coral">
+                Step {failure.step} could not be completed.
+              </p>
               <p className="mt-2 text-sm leading-6 text-paper/70">{failure.error.message}</p>
               {onDismiss && (
                 <button

@@ -141,7 +141,7 @@ function CasesPage() {
               <p className="text-sm text-paper/55">Loading cases from Studio Dev…</p>
             ) : readState === "ERROR_WITHOUT_DATA" ? (
               <div className="rounded-lg border border-coral/25 bg-coral/5 p-5">
-                <p className="text-sm font-semibold">Could not load cases</p>
+                <p className="text-sm font-semibold">TEMPER could not load the cases.</p>
                 <p className="mt-2 text-sm text-paper/65">
                   {query.error
                     ? rpcErrorMessage(query.error, false)

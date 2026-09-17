@@ -278,7 +278,8 @@ function CreateAgreement() {
           break;
         }
       }
-      if (!agreementId) throw new Error("Could not generate a unique agreement ID.");
+      if (!agreementId)
+        throw new Error("TEMPER could not generate a unique agreement ID. Try again.");
       setWrite(
         buildCreateAgreement(
           {

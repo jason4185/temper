@@ -338,7 +338,7 @@ function AgreementDetail() {
   if (!agreement)
     return (
       <AgreementError
-        message="Agreement not found on Studio Dev."
+        message="TEMPER could not find this agreement on Studio Dev."
         onRefresh={() => {
           if (!allowTemperManualRefresh(`agreement:${id}`)) return;
           clearAgreementReadCache(id);
@@ -375,7 +375,7 @@ function AgreementDetail() {
     }
   })();
   const setupTitle = agreementExpired
-    ? "Agreement expired"
+    ? "This agreement has expired."
     : agreement.status === "PROPOSED"
       ? canAccept
         ? "Review this agreement"
@@ -792,10 +792,10 @@ function AgreementDetail() {
                 >
                   <p className="text-xs font-bold uppercase tracking-[0.14em] text-coral">
                     {verificationIssue === "not_found"
-                      ? "Onchain record not found"
+                      ? "The liability record was not found."
                       : verificationIssue === "mismatch"
-                        ? "Liability record mismatch"
-                        : "Unable to verify onchain record"}
+                        ? "The liability record does not match this agreement."
+                        : "TEMPER could not verify the liability record."}
                   </p>
                   <p className="mt-3 text-sm leading-6 text-paper/70">{error}</p>
                   <div className="mt-5 flex flex-wrap gap-3">
@@ -1303,7 +1303,7 @@ function AgreementError({ message, onRefresh }: { message: string; onRefresh: ()
     <AppPage>
       <PageContainer>
         <section className="rounded-lg border border-coral/30 bg-coral/10 p-6">
-          <h1 className="text-xl font-bold">Agreement unavailable</h1>
+          <h1 className="text-xl font-bold">This agreement is unavailable.</h1>
           <p className="mt-2 text-paper/70">{message}</p>
           <Button className="mt-5" variant="hero" onClick={onRefresh}>
             Refresh

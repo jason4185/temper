@@ -46,7 +46,7 @@ export const Route = createFileRoute("/api/prepare-evidence")({
               ? reason
               : new EvidencePreparationError(
                   "EVIDENCE_INTERNAL",
-                  "Evidence could not be prepared.",
+                  "TEMPER could not prepare the evidence. Try again.",
                   502,
                 );
           if (error.code === "EVIDENCE_INTERNAL") console.error(reason);

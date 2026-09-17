@@ -53,7 +53,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           This page didn't load
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          This page could not be loaded. Try refreshing or go back home.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button

@@ -165,7 +165,7 @@ function CaseDetail() {
       <AppPage>
         <PageContainer>
           <section className="rounded-lg border border-coral/30 bg-coral/10 p-6">
-            <h1 className="text-xl font-bold">Could not load case</h1>
+            <h1 className="text-xl font-bold">TEMPER could not load this case.</h1>
             <p className="mt-2 text-paper/70">{rpcErrorMessage(query.error, false)}</p>
             <Button
               className="mt-5"
@@ -187,7 +187,7 @@ function CaseDetail() {
       <AppPage>
         <PageContainer>
           <section className="rounded-lg border border-coral/30 bg-coral/10 p-6">
-            <h1 className="text-xl font-bold">Case unavailable</h1>
+            <h1 className="text-xl font-bold">This case is unavailable.</h1>
             <p className="mt-2 text-paper/70">This agreement has no case on Studio Dev.</p>
             <Button
               className="mt-5"
@@ -264,7 +264,7 @@ function CaseDetail() {
       : canJudge
         ? "READY FOR GENLAYER JUDGMENT"
         : canTimeout
-          ? "Contract deadline passed · Timeout available"
+          ? "The contract deadline has passed. A timeout is available."
           : item.status === "JUDGMENT_PENDING"
             ? "GenLayer judgment in progress"
             : item.status === "RESOLVED"
@@ -442,9 +442,9 @@ function CaseDetail() {
                     confirmedLoss={item.confirmedLoss}
                     secured={secured}
                   />
-                  <h2 className="text-xl font-bold">Timeout available</h2>
+                  <h2 className="text-xl font-bold">A procedural timeout is available.</h2>
                   <p className="mt-2 text-sm text-paper/65">
-                    The contract deadline has passed. Trigger the permissionless timeout resolution.
+                    The contract deadline has passed. You can now finalize the procedural timeout.
                   </p>
                 </>
               )}
@@ -1511,7 +1511,7 @@ function VerdictPanel({
           : item.resolutionBasis === "UNCHALLENGED_MITIGATION"
             ? "Mitigation went unchallenged"
             : item.resolutionBasis === "MITIGATION_JUDGMENT_TIMEOUT"
-              ? "Judgment window expired"
+              ? "The judgment window has expired."
               : "No mitigation challenge was submitted";
   const supportingCopy =
     verdict === "UNDETERMINED"

@@ -296,8 +296,8 @@ function priorityRank(priority: ReadPriority) {
 function cooldownError(kind: "rate-limit" | "server-busy") {
   return new Error(
     kind === "rate-limit"
-      ? "Studio Dev read rate-limit cooldown is active."
-      : "Studio Dev server-busy cooldown is active.",
+      ? "Studio Dev is temporarily limiting reads. Try again shortly."
+      : "Studio Dev is temporarily busy. Try again shortly.",
   );
 }
 
@@ -412,12 +412,12 @@ export function rpcErrorMessage(reason: unknown, hasStaleData = false) {
   }
   if (errorClass === "RATE_LIMIT") {
     return hasStaleData
-      ? "Studio Dev is temporarily rate-limiting reads. Showing the latest loaded state. Try refreshing shortly."
-      : "Studio Dev is temporarily rate-limiting reads. Try refreshing shortly.";
+      ? "Studio Dev is temporarily limiting reads. The latest loaded state is still shown. Try refreshing shortly."
+      : "Studio Dev is temporarily limiting reads. Try refreshing shortly.";
   }
   if (errorClass === "SERVER_BUSY") {
     return hasStaleData
-      ? "Studio Dev is temporarily busy. Showing the latest loaded state. Try refreshing shortly."
+      ? "Studio Dev is temporarily busy. The latest loaded state is still shown. Try refreshing shortly."
       : "Studio Dev is temporarily busy. Try refreshing shortly.";
   }
   if (errorClass === "TRANSPORT_FAILURE") {
@@ -426,7 +426,7 @@ export function rpcErrorMessage(reason: unknown, hasStaleData = false) {
       : "Studio Dev could not be reached. Try again shortly.";
   }
   if (errorClass === "CONTRACT_USER_ERROR") {
-    return "Studio Dev rejected the request. Check the wallet permissions and current agreement state.";
+    return "Studio Dev could not complete that request. Check your wallet permissions and the current agreement state.";
   }
   if (errorClass === "PARSE_FRONTEND_ERROR") {
     return "TEMPER could not interpret the Studio Dev response. Try again shortly.";
@@ -732,7 +732,7 @@ function nextAction(
   if (deadlineExpired(deadline)) {
     return {
       label: "Trigger timeout",
-      description: "The contract deadline has passed.",
+      description: "The contract deadline has passed. You can now finalize the procedural timeout.",
       kind: "case",
     };
   }

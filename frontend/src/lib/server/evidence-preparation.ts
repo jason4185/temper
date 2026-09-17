@@ -67,7 +67,7 @@ export async function prepareEvidenceFromUrl(
       if (redirectCount >= MAX_EVIDENCE_REDIRECTS) {
         throw new EvidencePreparationError(
           "EVIDENCE_REDIRECT",
-          "Evidence URL exceeded the maximum redirect limit.",
+          "The evidence URL redirected too many times.",
           400,
         );
       }
@@ -75,7 +75,7 @@ export async function prepareEvidenceFromUrl(
       if (!location) {
         throw new EvidencePreparationError(
           "EVIDENCE_REDIRECT",
-          "Evidence server returned an invalid redirect.",
+          "The evidence URL returned an invalid redirect.",
           502,
         );
       }
@@ -86,12 +86,16 @@ export async function prepareEvidenceFromUrl(
     if (!response.ok) {
       throw new EvidencePreparationError(
         "EVIDENCE_HTTP_ERROR",
-        `Evidence server returned HTTP ${response.status}.`,
+        `The evidence URL returned an HTTP ${response.status} response.`,
         502,
       );
     }
     if (!body || body.byteLength === 0) {
-      throw new EvidencePreparationError("EVIDENCE_EMPTY", "Evidence is empty.", 400);
+      throw new EvidencePreparationError(
+        "EVIDENCE_EMPTY",
+        "The evidence URL returned an empty response.",
+        400,
+      );
     }
 
     const digestInput = new ArrayBuffer(body.byteLength);
@@ -113,7 +117,7 @@ export async function readBoundedBody(
   if (Number.isFinite(contentLength) && contentLength > maxBytes) {
     throw new EvidencePreparationError(
       "EVIDENCE_TOO_LARGE",
-      `Evidence exceeded the ${maxBytes}-byte limit.`,
+      `The evidence is larger than the ${maxBytes}-byte limit.`,
       413,
     );
   }
@@ -125,7 +129,11 @@ export async function readBoundedBody(
   try {
     for (;;) {
       if (signal?.aborted) {
-        throw new EvidencePreparationError("EVIDENCE_TIMEOUT", "Evidence request timed out.", 504);
+        throw new EvidencePreparationError(
+          "EVIDENCE_TIMEOUT",
+          "The evidence request timed out. Check that the URL responds promptly and try again.",
+          504,
+        );
       }
       const { done, value } = await reader.read();
       if (done) break;
@@ -135,7 +143,7 @@ export async function readBoundedBody(
         await reader.cancel();
         throw new EvidencePreparationError(
           "EVIDENCE_TOO_LARGE",
-          `Evidence exceeded the ${maxBytes}-byte limit.`,
+          `The evidence is larger than the ${maxBytes}-byte limit.`,
           413,
         );
       }
@@ -159,7 +167,7 @@ async function assertPublicTarget(hostname: string, dnsFetchImpl: typeof fetch) 
   if (isBlockedHostname(normalizedHostname)) {
     throw new EvidencePreparationError(
       "BLOCKED_HOST",
-      "Evidence URL points to a private or local network address.",
+      "The evidence URL must be publicly accessible. Private and local network addresses are not supported.",
       400,
     );
   }
@@ -168,7 +176,7 @@ async function assertPublicTarget(hostname: string, dnsFetchImpl: typeof fetch) 
   if (literalAddress && isPrivateIp(literalAddress)) {
     throw new EvidencePreparationError(
       "PRIVATE_ADDRESS",
-      "Evidence URL points to a private or local network address.",
+      "The evidence URL must be publicly accessible. Private and local network addresses are not supported.",
       400,
     );
   }
@@ -183,7 +191,7 @@ async function assertPublicTarget(hostname: string, dnsFetchImpl: typeof fetch) 
   ) {
     throw new EvidencePreparationError(
       "PRIVATE_ADDRESS",
-      "Evidence URL points to a private or local network address.",
+      "The evidence URL must be publicly accessible. Private and local network addresses are not supported.",
       400,
     );
   }
@@ -207,13 +215,21 @@ async function resolveDns(hostname: string, dnsFetchImpl: typeof fetch): Promise
       (result, signal) => readBoundedBody(result, 64 * 1024, signal),
     );
     if (!response.ok || !body) {
-      throw new EvidencePreparationError("DNS_FAILED", "Evidence URL could not be resolved.", 502);
+      throw new EvidencePreparationError(
+        "DNS_FAILED",
+        "The evidence URL could not be resolved. Check that the domain is publicly accessible and try again.",
+        502,
+      );
     }
     let payload: unknown;
     try {
       payload = JSON.parse(new TextDecoder().decode(body));
     } catch {
-      throw new EvidencePreparationError("DNS_FAILED", "Evidence URL could not be resolved.", 502);
+      throw new EvidencePreparationError(
+        "DNS_FAILED",
+        "The evidence URL could not be resolved. Check that the domain is publicly accessible and try again.",
+        502,
+      );
     }
     if (
       typeof payload !== "object" ||
@@ -237,7 +253,11 @@ async function resolveDns(hostname: string, dnsFetchImpl: typeof fetch): Promise
     }
   }
   if (!addresses.size) {
-    throw new EvidencePreparationError("DNS_FAILED", "Evidence URL could not be resolved.", 502);
+    throw new EvidencePreparationError(
+      "DNS_FAILED",
+      "The evidence URL could not be resolved. Check that the domain is publicly accessible and try again.",
+      502,
+    );
   }
   return [...addresses];
 }
@@ -258,11 +278,15 @@ async function fetchWithTimeout<T>(
   } catch (reason) {
     if (reason instanceof EvidencePreparationError) throw reason;
     if (controller.signal.aborted) {
-      throw new EvidencePreparationError("EVIDENCE_TIMEOUT", "Evidence request timed out.", 504);
+      throw new EvidencePreparationError(
+        "EVIDENCE_TIMEOUT",
+        "The evidence request timed out. Check that the URL responds promptly and try again.",
+        504,
+      );
     }
     throw new EvidencePreparationError(
       "EVIDENCE_UNREACHABLE",
-      "Evidence URL could not be reached.",
+      "The evidence URL could not be reached. Check that it is publicly accessible over HTTPS and try again.",
       502,
     );
   } finally {
@@ -283,29 +307,29 @@ async function consumeEvidenceBody(
 
 function parseEvidenceUrl(rawUrl: string): URL {
   if (typeof rawUrl !== "string" || rawUrl.length === 0 || rawUrl.length > MAX_URL_LENGTH) {
-    throw new EvidencePreparationError("INVALID_URL", "Evidence URL is not valid.", 400);
+    throw new EvidencePreparationError("INVALID_URL", "Enter a valid evidence URL.", 400);
   }
   if (rawUrl !== rawUrl.trim()) {
-    throw new EvidencePreparationError("INVALID_URL", "Evidence URL is not valid.", 400);
+    throw new EvidencePreparationError("INVALID_URL", "Enter a valid evidence URL.", 400);
   }
 
   let url: URL;
   try {
     url = new URL(rawUrl);
   } catch {
-    throw new EvidencePreparationError("INVALID_URL", "Evidence URL is not valid.", 400);
+    throw new EvidencePreparationError("INVALID_URL", "Enter a valid evidence URL.", 400);
   }
   if (url.protocol !== "https:") {
-    throw new EvidencePreparationError("UNSUPPORTED_PROTOCOL", "Evidence URL must use HTTPS.", 400);
+    throw new EvidencePreparationError("UNSUPPORTED_PROTOCOL", "Enter an HTTPS evidence URL.", 400);
   }
   if (url.username || url.password || url.hash || !url.hostname) {
-    throw new EvidencePreparationError("INVALID_URL", "Evidence URL is not valid.", 400);
+    throw new EvidencePreparationError("INVALID_URL", "Enter a valid evidence URL.", 400);
   }
   const hostname = normalizeHostname(url.hostname);
   if (isBlockedHostname(hostname)) {
     throw new EvidencePreparationError(
       "BLOCKED_HOST",
-      "Evidence URL points to a private or local network address.",
+      "The evidence URL must be publicly accessible. Private and local network addresses are not supported.",
       400,
     );
   }
@@ -313,7 +337,7 @@ function parseEvidenceUrl(rawUrl: string): URL {
   if (literalAddress && isPrivateIp(literalAddress)) {
     throw new EvidencePreparationError(
       "PRIVATE_ADDRESS",
-      "Evidence URL points to a private or local network address.",
+      "The evidence URL must be publicly accessible. Private and local network addresses are not supported.",
       400,
     );
   }
@@ -354,7 +378,7 @@ function parseIpLiteral(hostname: string): IpAddress | undefined {
   if (!hostname.includes(":")) return undefined;
   const ipv6 = parseIpv6(hostname);
   if (ipv6 === undefined) {
-    throw new EvidencePreparationError("INVALID_URL", "Evidence URL is not valid.", 400);
+    throw new EvidencePreparationError("INVALID_URL", "Enter a valid evidence URL.", 400);
   }
   return { kind: "ipv6", value: ipv6 };
 }
