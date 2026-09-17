@@ -454,7 +454,7 @@ function CaseDetail() {
                 onClick={() => begin(buildTriggerTimeout(id))}
                 disabled={Boolean(write)}
               >
-                Trigger Timeout
+                Resolve Timeout
               </Button>
             </div>
           ) : item.status === "JUDGMENT_PENDING" ? (
@@ -868,8 +868,9 @@ function ResponseWindowNotice({
           Response window ended
         </p>
         <p className="mt-1 text-sm leading-5 text-paper/60">
-          The response period has expired. The case may now proceed through TEMPER&apos;s existing
-          timeout path.
+          {audience === "claimant"
+            ? "You did not respond before the response deadline. The Service Renderer’s mitigation claim is now eligible for procedural timeout resolution. No GenLayer judgment occurs unless a response was submitted and the normal judgment path is used."
+            : "The response period has expired. The mitigation claim is eligible for procedural timeout resolution."}
         </p>
       </div>
     );
@@ -1597,13 +1598,17 @@ function VerdictPanel({
       </div>
       {item.status === "RESOLVED" && (
         <p className="mt-5 text-sm text-paper/65">
-          Remedy ready for settlement. The GenLayer judgment has been applied to the secured loss.
+          {procedural
+            ? "Procedural remedy ready for settlement. The recoverable and avoidable amounts come from the contract’s timeout resolution."
+            : "Remedy ready for settlement. The GenLayer judgment has been applied to the secured loss."}
         </p>
       )}
       {settled && (
         <div className="mt-5 rounded-md border border-mint/20 bg-mint/5 p-3.5">
           <p className="text-sm text-paper/65">
-            Remedy settled. TEMPER applied the GenLayer judgment to the secured bond.
+            {procedural
+              ? "Remedy settled. TEMPER applied the contract’s procedural resolution to the secured bond."
+              : "Remedy settled. TEMPER applied the GenLayer judgment to the secured bond."}
           </p>
           <p className="mt-2 text-xs font-semibold text-paper/50">
             {formatGen(item.recoverableAmount)} GEN claimant remedy ·{" "}
