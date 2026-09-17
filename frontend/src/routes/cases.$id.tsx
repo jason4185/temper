@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Circle, FileCheck2, RefreshCw, Scale } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -86,6 +86,50 @@ function CaseDetail() {
     queryFn: () => getDemoLossRecordedAt(item!.trustedLiabilitySource, item!.liabilityReceiptId),
     enabled: isDemoLiabilitySource,
   });
+  const claimantResponseSubmitted = Boolean(
+    item &&
+    (item.evidence.some((e) => e.side === "other-party") ||
+      Boolean(item.claimantResponse?.trim()) ||
+      ["MITIGATION_DISPUTED", "JUDGMENT_PENDING", "RESOLVED", "SETTLED", "CLOSED"].includes(
+        item.status,
+      )),
+  );
+  const responseWindowDeadline = item?.stageDeadline ?? 0n;
+  const responseWindowActive =
+    item?.status === "MITIGATION_CHALLENGED" &&
+    !claimantResponseSubmitted &&
+    responseWindowDeadline !== 0n;
+  const [nowSeconds, setNowSeconds] = useState(() => Math.floor(Date.now() / 1000));
+  const expiryRefreshDeadline = useRef<bigint | null>(null);
+  const refetchCase = query.refetch;
+  useEffect(() => {
+    if (!responseWindowActive) {
+      expiryRefreshDeadline.current = null;
+      return;
+    }
+
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+    const tick = () => {
+      const currentSeconds = Math.floor(Date.now() / 1000);
+      setNowSeconds(currentSeconds);
+      if (BigInt(currentSeconds) >= responseWindowDeadline) {
+        if (expiryRefreshDeadline.current !== responseWindowDeadline) {
+          expiryRefreshDeadline.current = responseWindowDeadline;
+          void refetchCase();
+        }
+        if (intervalId !== undefined) clearInterval(intervalId);
+      }
+    };
+
+    tick();
+    if (BigInt(Math.floor(Date.now() / 1000)) < responseWindowDeadline) {
+      intervalId = setInterval(tick, 1000);
+    }
+
+    return () => {
+      if (intervalId !== undefined) clearInterval(intervalId);
+    };
+  }, [refetchCase, responseWindowActive, responseWindowDeadline]);
   const refresh = async () => {
     setError(undefined);
     clearAgreementReadCache(id);
@@ -161,14 +205,17 @@ function CaseDetail() {
     );
   const providerEvidence = item.evidence.filter((e) => e.side === "provider");
   const challengeEvidence = item.evidence.filter((e) => e.side === "other-party");
-  const claimantResponseSubmitted =
-    challengeEvidence.length > 0 ||
-    Boolean(item.claimantResponse?.trim()) ||
-    ["MITIGATION_DISPUTED", "JUDGMENT_PENDING", "RESOLVED", "SETTLED", "CLOSED"].includes(
-      item.status,
-    );
   const resolved =
     item.status === "RESOLVED" || item.status === "SETTLED" || item.status === "CLOSED";
+  const responseWindowExpired =
+    responseWindowActive && BigInt(nowSeconds) >= responseWindowDeadline;
+  const responseWindowRemainingSeconds = responseWindowActive
+    ? Number(
+        responseWindowDeadline > BigInt(nowSeconds)
+          ? responseWindowDeadline - BigInt(nowSeconds)
+          : 0n,
+      )
+    : 0;
   const deadlinePassed = item.stageDeadline !== 0n && item.stageDeadline <= unixNow();
   const canSubmit = item.status === "CLAIM_OPEN" && item.role === "Provider" && !deadlinePassed;
   const canDispute =
@@ -213,7 +260,7 @@ function CaseDetail() {
   const actionSummary = canSubmit
     ? "PROVIDER ACTION REQUIRED"
     : canDispute
-      ? "Mitigation submitted · Claimant action required"
+      ? "RESPONSE REQUIRED"
       : canJudge
         ? "READY FOR GENLAYER JUDGMENT"
         : canTimeout
@@ -229,7 +276,9 @@ function CaseDetail() {
                   : item.status === "CLAIM_OPEN"
                     ? "Provider must show when the agreed fallback became reasonably available"
                     : item.status === "MITIGATION_CHALLENGED"
-                      ? "Claimant may now respond to the provider’s mitigation claim"
+                      ? item.role === "Provider"
+                        ? "WAITING FOR SERVICE USER RESPONSE"
+                        : "Claimant may now respond to the provider’s mitigation claim"
                       : item.status === "MITIGATION_DISPUTED"
                         ? "Ready for GenLayer judgment"
                         : "No action required from you right now";
@@ -351,6 +400,11 @@ function CaseDetail() {
                 confirmedLoss={item.confirmedLoss}
                 secured={secured}
               />
+              <ResponseWindowNotice
+                audience="claimant"
+                remainingSeconds={responseWindowRemainingSeconds}
+                expired={responseWindowExpired}
+              />
               <DisputeForm
                 response={response}
                 setResponse={setResponse}
@@ -375,15 +429,25 @@ function CaseDetail() {
             </div>
           ) : canTimeout ? (
             <div className="mt-3 rounded-lg border border-coral/30 bg-coral/10 p-6">
-              <ActionContext
-                summary={actionSummary}
-                confirmedLoss={item.confirmedLoss}
-                secured={secured}
-              />
-              <h2 className="text-xl font-bold">Timeout available</h2>
-              <p className="mt-2 text-sm text-paper/65">
-                The contract deadline has passed. Trigger the permissionless timeout resolution.
-              </p>
+              {responseWindowActive && responseWindowExpired ? (
+                <ResponseWindowNotice
+                  audience={item.role === "Other party" ? "claimant" : "provider"}
+                  remainingSeconds={0}
+                  expired
+                />
+              ) : (
+                <>
+                  <ActionContext
+                    summary={actionSummary}
+                    confirmedLoss={item.confirmedLoss}
+                    secured={secured}
+                  />
+                  <h2 className="text-xl font-bold">Timeout available</h2>
+                  <p className="mt-2 text-sm text-paper/65">
+                    The contract deadline has passed. Trigger the permissionless timeout resolution.
+                  </p>
+                </>
+              )}
               <Button
                 variant="hero"
                 className="mt-5"
@@ -454,28 +518,38 @@ function CaseDetail() {
                 confirmedLoss={item.confirmedLoss}
                 secured={secured}
               />
-              <h2 className="text-xl font-bold">
-                {item.status === "MITIGATION_CHALLENGED"
-                  ? "Claimant may now respond to the provider’s mitigation claim"
-                  : item.status === "MITIGATION_DISPUTED"
-                    ? "Ready for GenLayer judgment"
-                    : item.status === "SETTLED"
-                      ? "Waiting for provider withdrawal"
-                      : item.status === "CLOSED"
-                        ? "Case closed"
-                        : "No action required right now"}
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-paper/60">
-                {item.status === "MITIGATION_CHALLENGED"
-                  ? "The claimant may now respond to the provider’s mitigation evidence during the dispute window."
-                  : item.status === "MITIGATION_DISPUTED"
-                    ? "A provider or claimant wallet can request GenLayer to decide the remedy question."
-                    : item.status === "SETTLED"
-                      ? "The provider can withdraw any remaining bond to close the case."
-                      : item.status === "CLOSED"
-                        ? "The remedy has been fully settled under the agreement."
-                        : "The case is waiting for its next onchain state transition."}
-              </p>
+              {responseWindowActive ? (
+                <ResponseWindowNotice
+                  audience={item.role === "Other party" ? "claimant" : "provider"}
+                  remainingSeconds={responseWindowRemainingSeconds}
+                  expired={responseWindowExpired}
+                />
+              ) : (
+                <>
+                  <h2 className="text-xl font-bold">
+                    {item.status === "MITIGATION_CHALLENGED"
+                      ? "Claimant may now respond to the provider’s mitigation claim"
+                      : item.status === "MITIGATION_DISPUTED"
+                        ? "Ready for GenLayer judgment"
+                        : item.status === "SETTLED"
+                          ? "Waiting for provider withdrawal"
+                          : item.status === "CLOSED"
+                            ? "Case closed"
+                            : "No action required right now"}
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-paper/60">
+                    {item.status === "MITIGATION_CHALLENGED"
+                      ? "The claimant may now respond to the provider’s mitigation evidence during the dispute window."
+                      : item.status === "MITIGATION_DISPUTED"
+                        ? "A provider or claimant wallet can request GenLayer to decide the remedy question."
+                        : item.status === "SETTLED"
+                          ? "The provider can withdraw any remaining bond to close the case."
+                          : item.status === "CLOSED"
+                            ? "The remedy has been fully settled under the agreement."
+                            : "The case is waiting for its next onchain state transition."}
+                  </p>
+                </>
+              )}
             </div>
           )}
         </section>
@@ -776,6 +850,64 @@ function ActionContext({
       </p>
     </div>
   );
+}
+
+function ResponseWindowNotice({
+  audience,
+  remainingSeconds,
+  expired,
+}: {
+  audience: "claimant" | "provider";
+  remainingSeconds: number;
+  expired: boolean;
+}) {
+  if (expired) {
+    return (
+      <div className="mt-4 rounded-md border border-paper/15 bg-paper/[0.035] p-4">
+        <p className="text-sm font-bold uppercase tracking-[0.12em] text-paper/75">
+          Response window ended
+        </p>
+        <p className="mt-1 text-sm leading-5 text-paper/60">
+          The response period has expired. The case may now proceed through TEMPER&apos;s existing
+          timeout path.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`mt-4 rounded-md border p-4 ${
+        audience === "claimant"
+          ? "border-violet/35 bg-violet/10"
+          : "border-paper/15 bg-paper/[0.035]"
+      }`}
+    >
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-sm font-bold uppercase tracking-[0.12em] text-paper">
+            {audience === "claimant" ? "Response required" : "Waiting for Service User response"}
+          </p>
+          {audience === "claimant" && (
+            <p className="mt-1 text-sm leading-5 text-paper/65">
+              The Service Renderer has submitted a mitigation claim. Respond before the response
+              window closes.
+            </p>
+          )}
+        </div>
+        <p className="font-mono text-xl font-bold tabular-nums text-violet" aria-live="polite">
+          {formatResponseCountdown(remainingSeconds)} remaining
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function formatResponseCountdown(totalSeconds: number) {
+  const safeSeconds = Math.max(0, totalSeconds);
+  const minutes = Math.floor(safeSeconds / 60);
+  const seconds = safeSeconds % 60;
+  return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
 function ProviderEvidenceForm({
